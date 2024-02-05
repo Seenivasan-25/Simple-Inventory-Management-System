@@ -1,0 +1,122 @@
+#include<iostream>
+#include<fstream>
+#include<string>
+
+using namespace std;
+
+struct Item {
+    string name;
+    int quantity;
+    float price;
+};
+
+void addItem(Item item) {
+    ofstream outfile;
+    outfile.open("inventory.txt", ios::app);
+    outfile << item.name << "," << item.quantity << "," << item.price << endl;
+    outfile.close();
+}
+
+void updateItem(string name, int quantity, float price) {
+    ifstream infile;
+    ofstream outfile;
+    infile.open("inventory.txt");
+    outfile.open("temp.txt");
+    string line;
+    while (getline(infile, line)) {
+        size_t pos = line.find(",");
+        string itemName = line.substr(0, pos);
+        if (itemName == name) {
+            outfile << name << "," << quantity << "," << price << endl;
+        } else {
+            outfile << line << endl;
+        }
+    }
+    infile.close();
+    outfile.close();
+    remove("inventory.txt");
+    rename("temp.txt", "inventory.txt");
+}
+
+void deleteItem(string name) {
+    ifstream infile;
+    ofstream outfile;
+    infile.open("inventory.txt");
+    outfile.open("temp.txt");
+    string line;
+    while (getline(infile, line)) {
+        size_t pos = line.find(",");
+        string itemName = line.substr(0, pos);
+        if (itemName != name) {
+            outfile << line << endl;
+        }
+    }
+    infile.close();
+    outfile.close();
+    remove("inventory.txt");
+    rename("temp.txt", "inventory.txt");
+}
+
+void displayStock() {
+    ifstream infile;
+    infile.open("inventory.txt");
+    string line;
+    while (getline(infile, line)) {
+        size_t pos1 = line.find(",");
+        string itemName = line.substr(0, pos1);
+        size_t pos2 = line.find(",", pos1 + 1);
+        string itemQuantity = line.substr(pos1 + 1, pos2 - pos1 - 1);
+        string itemPrice = line.substr(pos2 + 1);
+        cout << "Name: " << itemName << ", Quantity: " << itemQuantity << ", Price: " << itemPrice << endl;
+    }
+    infile.close();
+}
+
+int main() {
+    int choice;
+    string name;
+    int quantity;
+    float price;
+    Item item;
+    while (true) {
+        cout << "1. Add item" << endl;
+        cout << "2. Update item" << endl;
+        cout << "3. Delete item" << endl;
+        cout << "4. Display stock" << endl;
+        cout << "5. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+        switch (choice) {
+            case 1:
+                cout << "Enter name: ";
+                cin >> item.name;
+                cout << "Enter quantity: ";
+                cin >> item.quantity;
+                cout << "Enter price: ";
+                cin >> item.price;
+                addItem(item);
+                break;
+            case 2:
+                cout << "Enter name: ";
+                cin >> name;
+                cout << "Enter quantity: ";
+                cin >> quantity;
+                cout << "Enter price: ";
+                cin >> price;
+                updateItem(name, quantity, price);
+                break;
+            case 3:
+                cout << "Enter name: ";
+                cin >> name;
+                deleteItem(name);
+                break;
+            case 4:
+                displayStock();
+                break;
+            case 5:
+                return 0;
+            default:
+                cout << "Invalid choice" << endl;
+        }
+    }
+}
